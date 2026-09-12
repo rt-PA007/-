@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2a2724">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>墨卷 · 成就积分</title>
+<style>
+:root{
+  --ink:#2a2724; --ink-soft:#5b544c; --paper:#f7f4ec;
+  --line:rgba(42,39,36,.14);
+  --bronze:#a9743f; --silver:#8b949e; --gold:#c39b2a; --jade:#3f9e8a;
+  --seal:#a8322d;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:"Songti SC","STSong","SimSun","Noto Serif SC",serif;
+  color:var(--ink); min-height:100vh; padding-bottom:90px;
+  background-color:#f4f1e8;
+  background-image:
+    radial-gradient(ellipse at 12% 8%, rgba(88,104,116,.14), transparent 45%),
+    radial-gradient(ellipse at 88% 16%, rgba(108,118,108,.12), transparent 42%),
+    radial-gradient(ellipse at 45% 96%, rgba(132,120,98,.14), transparent 52%),
+    linear-gradient(170deg,#f9f6ef 0%,#efe9dd 55%,#e7e0d1 100%);
+  background-attachment:fixed;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55;
+  background-image:repeating-linear-gradient(0deg, rgba(0,0,0,.014) 0 1px, transparent 1px 3px);
+}
+/* ===== 头部 ===== */
+header{
+  position:sticky;top:0;z-index:60;
+  background:rgba(246,243,235,.9);
+  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid rgba(42,39,36,.15);
+  box-shadow:0 4px 22px rgba(60,55,45,.07);
+}
+.hwrap{
+  max-width:900px;margin:0 auto;padding:14px 18px 10px;
+  display:flex;justify-content:space-between;align-items:center;gap:16px;
+}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.seal{
+  width:46px;height:46px;flex:0 0 auto;border-radius:9px;
+  background:linear-gradient(150deg,#b93a34,#8f2723);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:25px;font-family:"KaiTi","STKaiti",serif;
+  box-shadow:0 3px 12px rgba(168,50,45,.38);
+}
+h1{font-size:19px;letter-spacing:4px;font-weight:700;font-family:"KaiTi","STKaiti",serif}
+.sub{font-size:11px;color:var(--ink-soft);letter-spacing:1px;margin-top:3px}
+.total{text-align:right;flex:0 0 auto}
+.tlabel{font-size:11px;letter-spacing:3px;color:var(--ink-soft)}
+.tval{font-size:27px;font-weight:700;line-height:1.15;font-family:Georgia,"Times New Roman",serif;color:#1c1916;letter-spacing:.5px}
+.tmoney{font-size:11px;color:var(--ink-soft);letter-spacing:.5px}
+/* ===== 搜索 ===== */
+.searchbar{position:relative;max-width:900px;margin:0 auto;padding:0 18px 12px;display:flex;align-items:center}
+.sicon{position:absolute;left:33px;font-size:14px;opacity:.4;pointer-events:none}
+#search{
+  width:100%;padding:11px 42px 11px 42px;font-size:15px;font-family:inherit;
+  border:1px solid rgba(42,39,36,.2);border-radius:24px;
+  background:rgba(255,255,255,.62);color:var(--ink);outline:none;transition:.22s;
+}
+#search::placeholder{color:#9a938a;font-size:13.5px}
+#search:focus{border-color:var(--ink);background:#fff;box-shadow:0 0 0 3px rgba(42,39,36,.07)}
+#clearBtn{
+  position:absolute;right:30px;width:24px;height:24px;border-radius:50%;border:none;
+  background:rgba(42,39,36,.08);color:var(--ink-soft);cursor:pointer;font-size:14px;line-height:1;
+}
+#clearBtn:hover{background:rgba(42,39,36,.18)}
+.results{
+  position:absolute;left:18px;right:18px;top:calc(100% - 8px);
+  background:#fdfbf6;border:1px solid rgba(42,39,36,.16);border-radius:10px;
+  box-shadow:0 14px 34px rgba(50,45,35,.18);z-index:80;overflow:hidden;display:none;
+}
+.results.show{display:block}
+.ritem{
+  padding:11px 15px;cursor:pointer;display:flex;justify-content:space-between;gap:12px;
+  border-bottom:1px solid rgba(42,39,36,.07);font-size:14px;transition:.15s;
+}
+.ritem:last-child{border-bottom:none}
+.ritem:hover{background:rgba(42,39,36,.055)}
+.ritem .rp{color:var(--seal);font-weight:700;flex:0 0 auto;font-size:13px}
+/* ===== 导航 ===== */
+nav{max-width:900px;margin:0 auto;display:flex;gap:4px;padding:0 14px;overflow-x:auto}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  flex:1;min-width:76px;padding:9px 4px;border:none;background:transparent;
+  font-family:inherit;font-size:14px;color:var(--ink-soft);cursor:pointer;
+  border-bottom:2px solid transparent;transition:.2s;white-space:nowrap;letter-spacing:1.5px;
+}
+nav button.active{color:var(--ink);font-weight:700;border-bottom-color:var(--ink)}
+/* ===== 主体 ===== */
+main{max-width:900px;margin:0 auto;padding:18px;position:relative;z-index:1}
+.quote{
+  position:relative;padding:16px 20px 14px 24px;margin-bottom:22px;
+  font-family:"KaiTi","STKaiti",serif;font-size:16.5px;line-height:1.85;color:#3f3b35;
+  background:linear-gradient(90deg, rgba(255,255,255,.6), rgba(255,255,255,.12));
+  border-left:3px solid rgba(42,39,36,.34);border-radius:0 9px 9px 0;
+}
+.quote .qmark{position:absolute;left:8px;top:4px;font-size:30px;color:rgba(42,39,36,.16);font-family:Georgia,serif}
+.quote .qdate{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:8px;letter-spacing:2px;font-family:inherit}
+.cat{
+  margin:26px 0 12px;font-size:16.5px;letter-spacing:2px;position:relative;
+  padding-left:14px;display:flex;justify-content:space-between;align-items:baseline;
+}
+.cat::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:15px;background:var(--ink);border-radius:2px}
+.cat:first-child{margin-top:0}
+.cprog{font-size:12px;color:var(--ink-soft);letter-spacing:1px;font-weight:400}
+/* ===== 任务卡片 ===== */
+.task{
+  display:flex;align-items:center;gap:12px;padding:12px 15px;margin-bottom:9px;
+  background:rgba(255,255,255,.5);border:1px solid var(--line);
+  border-left:3px solid var(--ink-soft);border-radius:7px;cursor:pointer;
+  transition:.2s;position:relative;user-select:none;
+}
+.task:hover{background:rgba(255,255,255,.85);transform:translateX(3px);box-shadow:0 4px 14px rgba(60,55,45,.08)}
+.task.done{opacity:.6}
+.task.done .name{text-decoration:line-through;text-decoration-color:rgba(42,39,36,.4)}
+.mark{
+  width:20px;height:20px;flex:0 0 auto;border:1.5px solid rgba(42,39,36,.45);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:12px;color:transparent;transition:.2s;
+}
+.task.done .mark{background:var(--ink);border-color:var(--ink);color:#f7f4ec}
+.body{flex:1;min-width:0}
+.name{font-size:15px;letter-spacing:.5px}
+.desc{font-size:12px;color:var(--ink-soft);margin-top:3px;line-height:1.55}
+.pts{font-weight:700;font-size:14px;color:var(--seal);white-space:nowrap;flex:0 0 auto;font-family:Georgia,serif}
+.tag{
+  font-size:10.5px;padding:1px 6px;border-radius:3px;border:1px solid currentColor;
+  margin-left:7px;opacity:.85;letter-spacing:1px;vertical-align:middle;font-weight:400;
+}
+.task.r-bronze{border-left-color:var(--bronze)}
+.task.r-silver{border-left-color:var(--silver)}
+.task.r-gold{border-left-color:var(--gold)}
+.task.r-jade{border-left-color:var(--jade)}
+.task.r-bronze .tag{color:var(--bronze)}
+.task.r-silver .tag{color:var(--silver)}
+.task.r-gold .tag{color:var(--gold)}
+.task.r-jade .tag{color:var(--jade)}
+/* ===== 删除按钮 ===== */
+.del{
+  width:22px;height:22px;flex:0 0 auto;border:none;background:transparent;
+  color:rgba(42,39,36,.3);font-size:17px;line-height:1;cursor:pointer;
+  border-radius:50%;transition:.15s;font-family:inherit;
+}
+.del:hover{background:rgba(168,50,45,.12);color:var(--seal)}
+/* ===== 添加区 ===== */
+.add-box{margin-bottom:16px}
+.add-btn{
+  width:100%;padding:10px;border:1px dashed rgba(42,39,36,.3);border-radius:7px;
+  background:rgba(255,255,255,.35);color:var(--ink-soft);font-family:inherit;
+  font-size:13.5px;letter-spacing:2px;cursor:pointer;transition:.2s;
+}
+.add-btn:hover{background:rgba(255,255,255,.75);border-color:var(--ink);color:var(--ink)}
+.form-wrap{
+  padding:14px;border:1px solid rgba(42,39,36,.16);border-radius:8px;
+  background:rgba(255,255,255,.6);display:flex;flex-direction:column;gap:9px;
+}
+.form-wrap input{
+  padding:9px 12px;border:1px solid rgba(42,39,36,.2);border-radius:6px;
+  font-family:inherit;font-size:14px;background:#fff;color:var(--ink);outline:none;
+  transition:.18s;
+}
+.form-wrap input:focus{border-color:var(--ink);box-shadow:0 0 0 3px rgba(42,39,36,.06)}
+.f-actions{display:flex;gap:9px;justify-content:flex-end}
+.f-actions button{
+  padding:8px 18px;border-radius:6px;font-family:inherit;font-size:13.5px;
+  cursor:pointer;letter-spacing:1px;border:1px solid rgba(42,39,36,.25);
+  background:rgba(255,255,255,.85);color:var(--ink-soft);transition:.18s;
+}
+.f-actions button[data-submit]{background:var(--ink);color:#f7f4ec;border-color:var(--ink)}
+.f-actions button:hover{transform:translateY(-1px)}
+.add-locked{
+  padding:11px;border:1px dashed rgba(42,39,36,.22);border-radius:7px;
+  text-align:center;font-size:13px;color:var(--ink-soft);letter-spacing:1px;
+  background:rgba(255,255,255,.25);line-height:1.6;
+}
+.add-locked .lk{font-size:14px;margin-right:5px}
+/* ===== 提示 ===== */
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(24px);
+  background:rgba(42,39,36,.93);color:#f6f3ea;padding:11px 22px;border-radius:24px;
+  font-size:14px;opacity:0;pointer-events:none;transition:.28s;z-index:300;
+  max-width:86vw;text-align:center;letter-spacing:.5px;
+  box-shadow:0 8px 26px rgba(30,26,22,.35);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.hint{font-size:12px;color:var(--ink-soft);text-align:center;padding:6px 0 14px;letter-spacing:1px}
+@media (max-width:520px){
+  h1{font-size:16px;letter-spacing:2px}
+  .tval{font-size:22px}
+  .seal{width:40px;height:40px;font-size:21px}
+  .name{font-size:14px}
+  .desc{font-size:11.5px}
+  .pts{font-size:13px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hwrap">
+    <div class="brand">
+      <div class="seal">墨</div>
+      <div>
+        <h1>成就墨卷</h1>
+        <div class="sub" id="today"></div>
+      </div>
+    </div>
+    <div class="total">
+      <div class="tlabel">总 积 分</div>
+      <div class="tval" id="total">0</div>
+      <div class="tmoney" id="money">≈ ¥0.00</div>
+    </div>
+  </div>
+
+  <div class="searchbar">
+    <span class="sicon">🔍</span>
+    <input id="search" placeholder="输入今日完成的事，如：跑步 / 缝合 / 单词 / 早八…" autocomplete="off">
+    <button id="clearBtn" title="清空">×</button>
+    <div class="results" id="results"></div>
+  </div>
+
+  <nav id="nav">
+    <button data-tab="daily">日常任务</button>
+    <button data-tab="main">主线任务</button>
+    <button data-tab="side">月支线</button>
+    <button data-tab="hidden">隐藏成就</button>
+  </nav>
+</header>
+
+<main>
+  <div class="quote" id="quote"></div>
+  <div id="content"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================== 数据区 ==================== */
+const MAIN = [
+  ["古希腊雕像","腹部肌肉≥4，肩背肌肉明显，体重≤60kg",100000],
+  ["黄金分割比例","发布抖音作品播放量≥1w，视频数≥5条",150000],
+  ["第二语言-I","轻取英语四级",80000],
+  ["第二语言-II","轻取英语六级，正式/模拟成绩≥70%",320000],
+  ["语言学家","雅思≥6.5 / 通过除英语外的另一门语言初级模拟或正式成绩≥60%",600000],
+  ["首发球员","在任意一支球队获得两节以上的出场时间，场均得分≥10分（每赛季）",300000],
+  ["初攀高峰","本学期平均绩点≥3.5（每期）",300000],
+  ["顶级医学生","平均绩点≥4.0（每期）",550000],
+  ["科研新星","发表一篇meta分析，成功被任意主流期刊收录（每篇）",600000],
+  ["操盘手","每学期账户盈利≥50%",490000],
+  ["博学者","成为初级分析者领域≥3，分析结果获得85%以上的AI评分",490000]
+];
+
+const DAILY = [
+  ["规律作息","23:30前睡，7:00前起；按课表调整",40],
+  ["强化饮食","2L水，三餐规律，不夜宵",40],
+  ["非母语者","单词50+复习100，或听力/阅读15分钟",50],
+  ["博闻者","非教材书10页，或文献摘要1篇",50],
+  ["先知","写明日3件事 + 今日完成度",60],
+  ["随机善行","日行一善，或联系家人/朋友10分钟",60],
+  ["步行者","8000步，或力量训练/球类20分钟",70],
+  ["二次学习","主修课复盘20分钟，或体格检查/缝合/问诊20分钟",80]
+];
+
+const HIDDEN = [
+["一、学业与考试",[
+ ["我上早八","连续14天早八不迟到且坐前排",5000],
+ ["考试方舟","考试周每天完成最低日常",5000],
+ ["回溯专家","一周自习/实验≥20小时",8000],
+ ["到馆大师","连续7天学到闭馆",8000],
+ ["零补考","从挂科边缘到通过且无补考",10000]
+]],
+["二、临床与技能",[
+ ["初级缝合","缝合考核合格",3000],
+ ["初级穿刺","成功完成一次无菌穿刺/换药被认可",3000],
+ ["临床早鸟","见习提前30分钟到，连续10次",5000],
+ ["初级病历","完成10份完整病历，无重大错误",5000],
+ ["初级问诊","完整问诊10份且被带教认可",5000],
+ ["初级手术","跟台手术≥5次并写心得",5000],
+ ["初级门诊","跟诊≥10次并整理病例",5000],
+ ["初级心电","读100张心电图",5000],
+ ["初级影像","读50张CT/X光",5000],
+ ["高级缝合","缝合考核优秀",8000],
+ ["高级穿刺","成功完成5次无菌穿刺/换药被认可",8000],
+ ["无影灯加冕者","临床技能操作被带教表扬，或考核≥90",10000],
+ ["高级病历","完成30份完整病历，无重大错误",10000],
+ ["高级问诊","完整问诊30份且被带教认可",10000],
+ ["高级手术","跟台手术≥15次并写心得",10000],
+ ["高级门诊","跟诊≥30次并整理病例",10000],
+ ["高级心电","读300张心电图",10000],
+ ["高级影像","读150张CT/X光",10000],
+ ["大师级缝合","缝合被带教表扬",15000],
+ ["大师级穿刺","成功完成15次无菌穿刺/换药被认可",15000],
+ ["大师级病历","完成60份完整病历，无重大错误",20000],
+ ["大师级问诊","完整问诊60份且被带教认可",20000],
+ ["大师级手术","跟台手术≥30次并写心得",20000],
+ ["大师级门诊","跟诊≥60次并整理病例",20000],
+ ["大师级心电","读600张心电图",20000],
+ ["大师级影像","读300张CT/X光",20000],
+ ["完美级缝合","缝合比赛获奖或带教示范",30000],
+ ["完美级穿刺","成功完成30次无菌穿刺/换药被认可",30000],
+ ["急救先锋","完成一次急救演练或真实施救",30000],
+ ["完美级病历","完成100份完整病历，无重大错误",50000],
+ ["完美级问诊","完整问诊100份且被带教认可",50000],
+ ["完美级手术","跟台手术≥50次并写心得",50000],
+ ["完美级门诊","跟诊≥100次并整理病例",50000],
+ ["完美级心电","读1000张心电图",50000],
+ ["完美级影像","读500张CT/X光",50000]
+]],
+["三、科研与数据",[
+ ["初级文献","精读文献≥10篇并做卡片",5000],
+ ["会议提问者","参加学术会议并提问",8000],
+ ["实验室守夜人","连续7天进实验室",8000],
+ ["数据炼金者","掌握SPSS/R基础",10000],
+ ["伦理审查官","完成一次伦理申请",10000],
+ ["高级文献","精读文献≥30篇并做卡片",10000],
+ ["细胞培养者","独立完成细胞传代≥10次",15000],
+ ["小鼠守护者","独立完成动物实验并合规",15000],
+ ["统计星图","能独立完成t检验/卡方/回归",20000],
+ ["问卷远征者","设计并回收有效问卷≥200份",20000],
+ ["大师级文献","精读文献≥60篇并做卡片",20000],
+ ["同行评议者","完成一次审稿意见回复",30000],
+ ["第一人","完成一次正式投稿",50000],
+ ["完美级文献","精读文献≥100篇并做卡片",50000],
+ ["处子作","完成meta分析初稿",100000]
+]],
+["四、语言与表达",[
+ ["手写书信者","手写并寄出3封信",3000],
+ ["演讲星火","完成一次公开演讲",5000],
+ ["写作编年者","写一篇≥3000字文章",5000],
+ ["初级词汇","累计单词≥3000",5000],
+ ["医学巴别塔","无字幕听懂医学英语视频30分钟",8000],
+ ["英语耳","无字幕听懂英语播客30分钟",8000],
+ ["辩论罗盘","参加辩论赛并发言",8000],
+ ["原创创作者","发布≥10篇原创",10000],
+ ["播客主播","录制≥5期播客",10000],
+ ["高级词汇","累计单词≥6000",10000],
+ ["大师级词汇","累计单词≥10000",20000],
+ ["翻译包安装成功","用非英语外语完成简单交流",30000],
+ ["完美级词汇","累计单词≥15000",50000]
+]],
+["五、身体与运动",[
+ ["初级铁人","连续7天运动≥20分钟",3000],
+ ["初级晨跑","连续7天晨跑",3000],
+ ["高级铁人","连续14天运动≥20分钟",5000],
+ ["高级晨跑","连续14天晨跑",5000],
+ ["平板守夜人","平板支撑≥5分钟",8000],
+ ["游泳远航者","连续游泳1000米",10000],
+ ["大师级晨跑","连续30天晨跑",10000],
+ ["引体指挥官","连续引体≥15个",15000],
+ ["体脂削峰者","体脂率下降3%，或腰围-5cm",20000],
+ ["骑行远征者","单次骑行≥50km",20000],
+ ["大师级铁人","连续30天运动≥20分钟",20000],
+ ["登山封禅者","登顶一座≥1500m山峰",30000],
+ ["力量圣殿","深蹲/卧推/硬拉达体重1倍",30000],
+ ["完美级晨跑","连续90天晨跑",30000],
+ ["完美级铁人","连续90天运动≥20分钟",50000],
+ ["半马朝圣者","完成半程马拉松",100000],
+ ["全马圣殿","完成全程马拉松",300000]
+]],
+["六、饮食作息心理",[
+ ["初级深眠","连续7天23:30前睡",3000],
+ ["灶火文明","连续7天自己做饭/带饭",5000],
+ ["高级深眠","连续14天23:30前睡",5000],
+ ["生命泉协议","连续30天饮水2L",8000],
+ ["断糖远征者","连续14天不喝含糖饮料",8000],
+ ["蔬菜星图","连续14天每天蔬菜≥500g",8000],
+ ["情绪稳态协议","整月无暴食、无熬夜崩溃",8000],
+ ["感恩信使","连续30天写感恩三件事",8000],
+ ["晨昏线守夜人","连续30天7:00前起",10000],
+ ["冥想圣殿","连续30天冥想10分钟",10000],
+ ["日记编年者","连续30天写日记",10000],
+ ["数字断食者","连续3天无社交媒体",10000],
+ ["失败重生者","一次重大失败后7天内恢复计划",10000],
+ ["大师级深眠","连续30天23:30前睡",20000],
+ ["完美级深眠","连续90天23:30前睡",50000]
+]],
+["七、社交与善行",[
+ ["友谊维护者","主动组织一次朋友聚会",3000],
+ ["陌生善意","帮助陌生人并记录",3000],
+ ["师门星链","向老师/师兄师姐请教并获指导",5000],
+ ["家庭星链","每周联系家人≥3次连续4周",5000],
+ ["道歉勇者","真诚道歉并修复关系",5000],
+ ["告别仪式","认真完成一次告别",5000],
+ ["独处朝圣者","独自完成一次全天外出",5000],
+ ["仁心远征者","义诊/志愿≥8小时",10000],
+ ["急救传播者","教会3人心肺复苏",10000],
+ ["原谅圣殿","放下一次长期怨恨",10000],
+ ["五十善行银河","累计帮助别人50次",15000],
+ ["献血勇士","完成一次献血",20000]
+]],
+["八、财务与创作",[
+ ["数字整理官","整理云盘/相册/笔记体系",3000],
+ ["初级内容","连续4周更新作品",3000],
+ ["初级账册","每笔交易记录完整1个月",3000],
+ ["剪辑炼金术","独立完成一条精剪视频",5000],
+ ["摄影星图","拍一组主题照片≥30张",5000],
+ ["AI协作者","用AI完成一项学习/科研任务",8000],
+ ["风险守门人","连续30天不追涨杀跌",10000],
+ ["高级内容","连续8周更新作品",10000],
+ ["高级账册","每笔交易记录完整1学期",10000],
+ ["回溯专家","每笔交易记录完整一学期",15000],
+ ["金手指","单笔交易盈利≥20%且及时止盈",20000],
+ ["编程初阶","完成一个医学相关小程序/脚本",20000],
+ ["大师级内容","连续16周更新作品",20000],
+ ["大师级账册","每笔交易记录完整1年",20000],
+ ["资本炼金术","账户月盈利≥10%且回撤≤5%",50000],
+ ["网红","单条抖音播放≥5w",50000],
+ ["完美级内容","连续52周更新作品",50000],
+ ["完美级账册","每笔交易记录完整3年",50000]
+]],
+["九、阅读与艺术生活",[
+ ["日出见证者","看一次日出并记录",3000],
+ ["雨中行者","主动淋一次雨并写感受",3000],
+ ["植物守护者","养活一盆植物≥3个月",3000],
+ ["手作炼金术","完成一件手工作品",3000],
+ ["乐器星火","学会一首完整曲子",5000],
+ ["舞台星火","上台唱完一首歌",5000],
+ ["博物馆远征者","参观3个博物馆/美术馆",5000],
+ ["宠物陪伴者","照顾宠物/流浪动物≥10次",5000],
+ ["初级书虫","年阅读≥6本",5000],
+ ["初级影评","看12部经典电影并写短评",5000],
+ ["经典朝圣者","读完一本≥500页经典",10000],
+ ["高级书虫","年阅读≥12本",10000],
+ ["高级影评","看24部经典电影并写短评",10000],
+ ["大师级影评","看48部经典电影并写短评",20000],
+ ["大师级书虫","年阅读≥24本",30000],
+ ["完美级影评","看100部经典电影并写短评",50000],
+ ["完美级书虫","年阅读≥50本",80000]
+]],
+["十、奇遇与非线性人生",[
+ ["夜行观察者","独自夜行一次并记录安全",3000],
+ ["手速王者","游戏/打字/实验操作速度突破个人记录",3000],
+ ["深夜食堂","为朋友做一顿饭",3000],
+ ["天台观星者","在城市天台观星并记录",3000],
+ ["旧物重生者","修复一件旧物",3000],
+ ["声音收藏家","录制10种环境声音",3000],
+ ["气味记忆者","记录10种气味并写感受",3000],
+ ["味觉地图","记录10家小店味道",3000],
+ ["雨中奔跑者","在雨中奔跑一次",3000],
+ ["迷路探险家","在陌生城市迷路后独立返回",5000],
+ ["山顶星空","在山顶看星空",5000],
+ ["城市漫游者","步行探索一座城市≥20km",5000],
+ ["光影捕捉者","拍摄一次日出到日落延时",5000],
+ ["随机善意","匿名帮助一个人",5000],
+ ["随机旅行者","无计划短途旅行一次",8000],
+ ["陌生城市生存者","独自在陌生城市生活3天",10000],
+ ["摩托朝圣者","完成一次≥100km摩托骑行",10000],
+ ["驾照远征者","拿到驾照",20000],
+ ["国奖候选人","获校级以上奖学金",150000]
+]]
+];
+
+const SIDE = [
+["九月支线",[
+ ["看完一本书","",800],
+ ["体重下降4.5kg","目前空腹68kg",2000],
+ ["完成光速英语单词6000+及语法","",4000],
+ ["帮助别人10次","",500],
+ ["完成歌曲周旋","",500]
+]],
+["十月支线",[
+ ["日行一善","完成15次",800],
+ ["回本之路","账户资金≥3W",50000],
+ ["轻取四级","任意一次模拟成绩≥70%",20000],
+ ["阅读者","完成阅读书籍≥2本",2000],
+ ["健身达人","体重≤65kg",2000]
+]]
+];
+
+const QUOTES = [
+"你今天的每一步，都是未来病历上写不出的底气。",
+"医路漫漫，唯勤与诚不可辜负。",
+"不必比别人快，只需比昨天的自己清醒。",
+"刀要磨，书要读，人要早起。",
+"把每一件小事做到底，就是天赋。",
+"熬夜偷来的时间，身体都会连本带利收回。",
+"你现在读的每一页书，都是将来救人时的手速。",
+"积跬步者，终至千里；积小善者，自成星河。",
+"与其焦虑远方，不如整理今天的书桌。",
+"身体是唯一不能更换的器械，请按时保养。",
+"今天的自律，是明天的从容。",
+"读书不觉已春深，一寸光阴一寸金。",
+"允许自己慢，但不允许自己停。",
+"每一次缝合练习，都是在为某条生命预演。",
+"心如止水，手如磐石，眼如明镜。",
+"别问来不来得及，先做十分钟再说。"
+];
+
+/* ==================== 索引构建 ==================== */
+const ALL = [];
+const MAP = {};
+let _h = 0, _s = 0;
+
+function push(o){ ALL.push(o); MAP[o.id] = o; }
+
+function rebuildIndex(){
+  ALL.length = 0;
+  for(const k in MAP) delete MAP[k];
+  _h = 0; _s = 0;
+
+  MAIN.forEach((t,i)=>push({n:t[0],d:t[1],p:t[2],id:'m'+i,type:'main'}));
+  DAILY.forEach((t,i)=>push({n:t[0],d:t[1],p:t[2],id:'d'+i,type:'daily'}));
+  HIDDEN.forEach(([cat,items])=>items.forEach(t=>push({n:t[0],d:t[1],p:t[2],id:'h'+(_h++),type:'hidden',cat})));
+  SIDE.forEach(([cat,items])=>items.forEach(t=>push({n:t[0],d:t[1],p:t[2],id:'s'+(_s++),type:'side',cat})));
+
+  (S.custom.side||[]).forEach(c=>push({n:c.n,d:c.d,p:c.p,id:c.id,type:'side',cat:'自定义支线',custom:true}));
+  (S.custom.hidden||[]).forEach(c=>push({n:c.n,d:c.d,p:c.p,id:c.id,type:'hidden',cat:'自定义 · 编辑部',custom:true}));
+}
+
+/* ==================== 状态 ==================== */
+const KEY = 'ink-achievement-v3';
+let S = loadState();
+
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear() + '-' + (d.getMonth()+1) + '-' + d.getDate();
+}
+function loadState(){
+  let s = {once:{}, daily:{}, dailyDate: todayStr(), custom:{side:[], hidden:[]}};
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const o = JSON.parse(raw);
+      s.once = o.once || {};
+      s.daily = o.daily || {};
+      s.dailyDate = o.dailyDate || todayStr();
+      s.custom = o.custom || {side:[], hidden:[]};
+      if(!Array.isArray(s.custom.side)) s.custom.side = [];
+      if(!Array.isArray(s.custom.hidden)) s.custom.hidden = [];
+    }
+  }catch(e){}
+  if(s.dailyDate !== todayStr()){ s.dailyDate = todayStr(); s.daily = {}; }
+  return s;
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+}
+rebuildIndex();
+
+/* ==================== 工具 ==================== */
+function esc(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+function fmt(p){
+  if(p >= 10000){
+    const w = p/10000;
+    return (Number.isInteger(w) ? w : w.toFixed(1)) + 'W';
+  }
+  return String(p);
+}
+function fmtNum(n){ return n.toLocaleString('zh-CN'); }
+
+/* 稀有度：铜 → 银 → 金 → 玉 */
+function rarity(p){
+  if(p <= 5000)  return ['r-bronze','铜'];
+  if(p <= 15000) return ['r-silver','银'];
+  if(p <= 30000) return ['r-gold','金'];
+  return ['r-jade','玉'];
+}
+
+function isDone(t){ return t.type==='daily' ? !!S.daily[t.id] : !!S.once[t.id]; }
+function storeOf(t){ return t.type==='daily' ? S.daily : S.once; }
+
+/* ==================== 编辑部窗口 ==================== */
+function isEditorOpen(){
+  const now = new Date();
+  const lastDay = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  return now.getDate() === lastDay;
+}
+function nextEditorOpen(){
+  const now = new Date();
+  if(isEditorOpen()) return null;
+  const lastDay = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  return new Date(now.getFullYear(), now.getMonth(), lastDay, 0, 0, 0);
+}
+
+/* ==================== 积分 ==================== */
+function totalPoints(){
+  let sum = 0;
+  for(const t of ALL){ if(isDone(t)) sum += t.p; }
+  return sum;
+}
+
+/* ==================== 声音 ==================== */
+let AC = null;
+function beep(ok){
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    if(AC.state === 'suspended') AC.resume();
+    const now = AC.currentTime;
+    const notes = ok ? [880, 1318.5] : [392, 294];
+    notes.forEach((f,i)=>{
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f, now + i*0.085);
+      g.gain.setValueAtTime(0.0001, now + i*0.085);
+      g.gain.exponentialRampToValueAtTime(0.16, now + i*0.085 + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + i*0.085 + 0.30);
+      o.connect(g); g.connect(AC.destination);
+      o.start(now + i*0.085); o.stop(now + i*0.085 + 0.34);
+    });
+  }catch(e){}
+}
+
+/* ==================== 提示 ==================== */
+let toastTimer = null;
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 1900);
+}
+
+/* ==================== 渲染 ==================== */
+let tab = 'daily';
+
+function cardHTML(t){
+  const done = isDone(t);
+  const [cls,label] = rarity(t.p);
+  const del = t.custom ? `<button class="del" data-del="${t.id}" title="删除">×</button>` : '';
+  return `<div class="task ${cls}${done?' done':''}" data-id="${t.id}">
+    <div class="mark">✓</div>
+    <div class="body">
+      <div class="name">${esc(t.n)}<span class="tag">${label}</span></div>
+      ${t.d ? `<div class="desc">${esc(t.d)}</div>` : ''}
+    </div>
+    <div class="pts">+${fmt(t.p)}</div>
+    ${del}
+  </div>`;
+}
+
+function sectionHead(title, done, total){
+  return `<div class="cat">${esc(title)}<span class="cprog">${done} / ${total}</span></div>`;
+}
+
+/* 添加区 */
+function addAreaHTML(type){
+  if(type === 'side'){
+    return `<div class="add-box">
+      <button class="add-btn" data-open="side">＋ 添加月支线任务</button>
+      <div class="form-wrap" data-wrap="side" style="display:none">
+        <input class="f-name" placeholder="任务名称（如：看完一本书）" maxlength="30">
+        <input class="f-desc" placeholder="成就描述（选填）" maxlength="60">
+        <input class="f-pts" type="number" placeholder="积分（如：800）" min="1" max="9999999">
+        <div class="f-actions">
+          <button data-cancel="side">取消</button>
+          <button data-submit="side">确认添加</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  // 隐藏成就
+  if(isEditorOpen()){
+    return `<div class="add-box">
+      <button class="add-btn" data-open="hidden">＋ 添加隐藏成就 · 编辑部开启中</button>
+      <div class="form-wrap" data-wrap="hidden" style="display:none">
+        <input class="f-name" placeholder="成就名称（如：午夜读书人）" maxlength="30">
+        <input class="f-desc" placeholder="成就描述（选填）" maxlength="60">
+        <input class="f-pts" type="number" placeholder="积分（决定稀有度：铜 / 银 / 金 / 玉）" min="1" max="9999999">
+        <div class="f-actions">
+          <button data-cancel="hidden">取消</button>
+          <button data-submit="hidden">确认添加</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  const next = nextEditorOpen();
+  const when = next
+    ? `下次开启：${next.getMonth()+1}月${next.getDate()}日 00:00`
+    : '';
+  return `<div class="add-box">
+    <div class="add-locked"><span class="lk">🔒</span>编辑部尚未开启 · ${when}<br>（每月末开启 24 小时，可添加自定义隐藏成就）</div>
+  </div>`;
+}
+
+function render(){
+  const tp = totalPoints();
+  document.getElementById('total').textContent = fmtNum(tp);
+  document.getElementById('money').textContent = '≈ ¥' + (tp/100).toFixed(2);
+
+  const c = document.getElementById('content');
+  const list = ALL.filter(t=>t.type===tab);
+
+  if(tab === 'hidden' || tab === 'side'){
+    // 按分类动态分组（保持出现顺序）
+    const cats = [];
+    const groups = {};
+    list.forEach(t=>{
+      const cat = t.cat || '其他';
+      if(!groups[cat]){ groups[cat] = []; cats.push(cat); }
+      groups[cat].push(t);
+    });
+    let html = addAreaHTML(tab);
+    cats.forEach(cat=>{
+      const items = groups[cat];
+      const doneN = items.filter(isDone).length;
+      html += sectionHead(cat, doneN, items.length);
+      html += items.map(cardHTML).join('');
+    });
+    c.innerHTML = html;
+  }else if(tab === 'main'){
+    const doneN = list.filter(isDone).length;
+    c.innerHTML = sectionHead('主线任务', doneN, list.length) + list.map(cardHTML).join('');
+  }else{
+    const doneN = list.filter(isDone).length;
+    const pts = list.filter(isDone).reduce((a,b)=>a+b.p,0);
+    c.innerHTML = sectionHead('日常任务 · 每日刷新（基础合计 450 封顶）', doneN, list.length)
+      + `<div class="hint">今日已获得 ${pts} / 450 积分 · 每日 0 点自动重置</div>`
+      + list.map(cardHTML).join('');
+  }
+}
+
+/* ==================== 增删逻辑 ==================== */
+function addCustomTask(type, name, desc, pts){
+  const id = (type === 'side' ? 'cs' : 'ch') + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
+  S.custom[type].push({id, n:name, d:desc, p:pts});
+  save();
+  rebuildIndex();
+  render();
+  beep(true);
+  toast('✓ 已添加：' + name + '　+' + fmt(pts) + ' 积分');
+}
+
+function deleteCustom(id){
+  const t = MAP[id];
+  if(!t || !t.custom) return;
+  const arr = S.custom[t.type];
+  const idx = arr.findIndex(x=>x.id === id);
+  if(idx < 0) return;
+  const removed = arr.splice(idx, 1)[0];
+  delete S.once[id];
+  delete S.daily[id];
+  save();
+  rebuildIndex();
+  render();
+  beep(false);
+  toast('已删除：' + removed.n);
+}
+
+/* ==================== 勾选逻辑 ==================== */
+function completeTask(t){
+  const store = storeOf(t);
+  if(store[t.id]){
+    toast('「' + t.n + '」已经完成啦');
+    beep(true);
+    return;
+  }
+  store[t.id] = 1;
+  beep(true);
+  toast('✓ ' + t.n + '　+' + fmt(t.p) + ' 积分');
+  save();
+  render();
+}
+
+function toggleTask(t){
+  const store = storeOf(t);
+  if(store[t.id]){
+    delete store[t.id];
+    beep(false);
+    toast('已取消：' + t.n);
+  }else{
+    store[t.id] = 1;
+    beep(true);
+    toast('✓ ' + t.n + '　+' + fmt(t.p) + ' 积分');
+  }
+  save();
+  render();
+}
+
+/* ==================== 内容区事件委托 ==================== */
+document.getElementById('content').addEventListener('click', e=>{
+  // 删除自定义任务
+  const delBtn = e.target.closest('[data-del]');
+  if(delBtn){
+    e.stopPropagation();
+    deleteCustom(delBtn.dataset.del);
+    return;
+  }
+
+  // 打开添加表单
+  const openBtn = e.target.closest('[data-open]');
+  if(openBtn){
+    const type = openBtn.dataset.open;
+    const wrap = document.querySelector('[data-wrap="' + type + '"]');
+    if(wrap){
+      const showing = wrap.style.display !== 'none';
+      wrap.style.display = showing ? 'none' : 'flex';
+      if(!showing){
+        const inp = wrap.querySelector('.f-name');
+        if(inp) setTimeout(()=>inp.focus(), 40);
+      }
+    }
+    return;
+  }
+
+  // 取消
+  const cancelBtn = e.target.closest('[data-cancel]');
+  if(cancelBtn){
+    const type = cancelBtn.dataset.cancel;
+    const wrap = document.querySelector('[data-wrap="' + type + '"]');
+    if(wrap){
+      wrap.style.display = 'none';
+      wrap.querySelectorAll('input').forEach(i=>i.value='');
+    }
+    return;
+  }
+
+  // 提交
+  const submitBtn = e.target.closest('[data-submit]');
+  if(submitBtn){
+    const type = submitBtn.dataset.submit;
+    const wrap = document.querySelector('[data-wrap="' + type + '"]');
+    if(!wrap) return;
+    const name = wrap.querySelector('.f-name').value.trim();
+    const desc = wrap.querySelector('.f-desc').value.trim();
+    const ptsRaw = wrap.querySelector('.f-pts').value.trim();
+    const pts = parseInt(ptsRaw, 10);
+    if(!name){ toast('请填写任务名称'); beep(false); return; }
+    if(!pts || pts < 1 || isNaN(pts)){ toast('请填写有效的积分'); beep(false); return; }
+    addCustomTask(type, name, desc, pts);
+    wrap.querySelectorAll('input').forEach(i=>i.value='');
+    wrap.style.display = 'none';
+    return;
+  }
+
+  // 卡片勾选
+  const card = e.target.closest('.task');
+  if(!card) return;
+  const t = MAP[card.dataset.id];
+  if(t) toggleTask(t);
+});
+
+/* 表单里按回车直接提交 */
+document.getElementById('content').addEventListener('keydown', e=>{
+  if(e.key !== 'Enter') return;
+  const input = e.target;
+  if(!input.matches('.form-wrap input')) return;
+  const wrap = input.closest('.form-wrap');
+  if(!wrap) return;
+  const type = wrap.dataset.wrap;
+  const btn = wrap.querySelector('[data-submit="' + type + '"]');
+  if(btn) btn.click();
+});
+
+/* ==================== 切换标签 ==================== */
+document.getElementById('nav').addEventListener('click', e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  tab = btn.dataset.tab;
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active', b === btn));
+  hideResults();
+  render();
+});
+
+/* ==================== 搜索 ==================== */
+const searchInput = document.getElementById('search');
+const resultsBox = document.getElementById('results');
+
+function norm(s){ return (s||'').replace(/\s+/g,'').toLowerCase(); }
+
+function score(t, q){
+  const n = norm(t.n), d = norm(t.d), Q = norm(q);
+  if(!Q) return 0;
+  if(n === Q) return 1000;
+  if(n.includes(Q)) return 800 - n.length;
+  if(Q.includes(n)) return 700;
+  if(d.includes(Q)) return 500;
+  let i = 0;
+  for(const ch of n){ if(ch === Q[i]) i++; }
+  if(i === Q.length) return 320;
+  i = 0;
+  for(const ch of d){ if(ch === Q[i]) i++; }
+  if(i === Q.length) return 200;
+  return 0;
+}
+
+function bestMatch(q){
+  let best = null, bs = 0;
+  for(const t of ALL){
+    const s = score(t, q);
+    if(s > bs){ bs = s; best = t; }
+  }
+  return bs > 0 ? best : null;
+}
+
+function showResults(q){
+  if(!q){ hideResults(); return; }
+  const ms = ALL.map(t=>({t, s:score(t,q)}))
+                .filter(x=>x.s>0)
+                .sort((a,b)=>b.s-a.s)
+                .slice(0,6);
+  if(!ms.length){
+    resultsBox.innerHTML = '<div class="ritem"><span>未找到对应事项…</span></div>';
+    resultsBox.classList.add('show');
+    return;
+  }
+  resultsBox.innerHTML = ms.map(({t})=>{
+    const done = isDone(t);
+    const [,label] = rarity(t.p);
+    return `<div class="ritem" data-id="${t.id}">
+      <span>${esc(t.n)} <span style="opacity:.55;font-size:12px">[${label}]</span>${done?'　· 已完成':''}</span>
+      <span class="rp">+${fmt(t.p)}</span>
+    </div>`;
+  }).join('');
+  resultsBox.classList.add('show');
+}
+
+function hideResults(){ resultsBox.classList.remove('show'); }
+
+searchInput.addEventListener('input', ()=>{
+  const q = searchInput.value.trim();
+  showResults(q);
+  if(q){
+    const exact = ALL.find(t=>norm(t.n) === norm(q));
+    if(exact){
+      completeTask(exact);
+      searchInput.value = '';
+      hideResults();
+    }
+  }
+});
+
+searchInput.addEventListener('keydown', e=>{
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    const q = searchInput.value.trim();
+    if(!q) return;
+    const t = bestMatch(q);
+    if(t){
+      completeTask(t);
+      searchInput.value = '';
+      hideResults();
+    }else{
+      beep(false);
+      toast('未找到对应的事项，试试别的关键词');
+    }
+  }
+  if(e.key === 'Escape'){ searchInput.value=''; hideResults(); }
+});
+
+resultsBox.addEventListener('click', e=>{
+  const item = e.target.closest('.ritem');
+  if(!item || !item.dataset.id) return;
+  const t = MAP[item.dataset.id];
+  if(t){
+    completeTask(t);
+    searchInput.value = '';
+    hideResults();
+  }
+});
+
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  searchInput.value = '';
+  hideResults();
+  searchInput.focus();
+});
+
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.searchbar')) hideResults();
+});
+
+/* ==================== 每日语录 ==================== */
+function renderQuote(){
+  const d = new Date();
+  const start = new Date(d.getFullYear(), 0, 0);
+  const dayIdx = Math.floor((d - start) / 86400000);
+  const q = QUOTES[dayIdx % QUOTES.length];
+  const week = ['日','一','二','三','四','五','六'][d.getDay()];
+  document.getElementById('quote').innerHTML =
+    `<span class="qmark">“</span>${q}<span class="qdate">${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 · 星期${week}</span>`;
+  document.getElementById('today').textContent =
+    `${d.getMonth()+1}月${d.getDate()}日 · 每日任务已刷新`;
+}
+
+/* ==================== 启动 ==================== */
+document.querySelector('#nav button[data-tab="daily"]').classList.add('active');
+renderQuote();
+render();
+
+/* 每分钟检查一次编辑部窗口状态，若跨天自动刷新按钮 */
+setInterval(()=>{
+  if(tab === 'hidden'){
+    // 仅当状态可能变化时重绘
+    render();
+  }
+}, 60000);
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+</script>
+</body>
+</html>
